@@ -1,0 +1,6 @@
+﻿namespace Warehousepro.API.DTOs.Order
+{
+	public class OrderUpdateDto
+	{
+	}
+}

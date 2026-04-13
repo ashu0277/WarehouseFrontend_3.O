@@ -1,0 +1,135 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="fw-bold">Warehouses</h2>
+      <p class="text-muted">Manage your warehouse locations</p>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <i class="bi bi-plus-circle me-2"></i>Add Warehouse
+      </button>
+    </div>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <input type="text" class="form-control" placeholder="Search warehouses..." 
+            [(ngModel)]="searchTerm" (input)="filterWarehouses()">
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="statusFilter" (change)="filterWarehouses()">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="bi bi-x-circle me-2"></i>Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warehouses Table -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Total Zones</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let warehouse of filteredWarehouses">
+              <td><strong>{{ warehouse.warehouseID }}</strong></td>
+              <td>{{ warehouse.name }}</td>
+              <td>{{ warehouse.location }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="warehouse.status === 'Active'" [class.bg-secondary]="warehouse.status !== 'Active'">
+                  {{ warehouse.status }}
+                </span>
+              </td>
+              <td>{{ warehouse.totalZones }}</td>
+              <td>{{ warehouse.createdAt | date:'short' }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(warehouse)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(warehouse)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredWarehouses.length === 0">
+              <td colspan="7" class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No warehouses found
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ isEditMode ? 'Edit' : 'Create' }} Warehouse</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="warehouseForm">
+          <div class="mb-3">
+            <label class="form-label">Name *</label>
+            <input type="text" class="form-control" formControlName="name"
+              [class.is-invalid]="warehouseForm.get('name')?.invalid && warehouseForm.get('name')?.touched">
+            <div class="invalid-feedback">Name is required</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Location *</label>
+            <textarea class="form-control" formControlName="location" rows="3"
+              [class.is-invalid]="warehouseForm.get('location')?.invalid && warehouseForm.get('location')?.touched"
+              placeholder="Enter full address"></textarea>
+            <div class="invalid-feedback">Location is required</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveWarehouse()" [disabled]="warehouseForm.invalid">
+          {{ isEditMode ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal"></div>
+
+<!-- Delete Confirmation Dialog -->
+<app-confirm-dialog
+  [show]="showDeleteDialog"
+  title="Delete Warehouse"
+  [message]="'Are you sure you want to delete ' + selectedWarehouse?.name + '?'"
+  confirmText="Delete"
+  cancelText="Cancel"
+  (confirmed)="deleteWarehouse()"
+  (cancelled)="showDeleteDialog = false">
+</app-confirm-dialog>

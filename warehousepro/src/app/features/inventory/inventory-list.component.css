@@ -1,0 +1,41 @@
+.modal.show {
+  display: block;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+}
+
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+.modal {
+  z-index: 1050;
+}
+
+.stock-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.stock-high {
+  background-color: #28a745;
+}
+
+.stock-low {
+  background-color: #ffc107;
+}
+
+.stock-out {
+  background-color: #dc3545;
+}

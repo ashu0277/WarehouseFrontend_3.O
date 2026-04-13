@@ -1,0 +1,145 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="fw-bold">Items</h2>
+      <p class="text-muted">Manage inventory items</p>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <i class="bi bi-plus-circle me-2"></i>Add Item
+      </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <input type="text" class="form-control" placeholder="Search items..." 
+            [(ngModel)]="searchTerm" (input)="filterItems()">
+        </div>
+        <div class="col-md-4">
+          <select class="form-select" [(ngModel)]="statusFilter" (change)="filterItems()">
+            <option value="">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="bi bi-x-circle me-2"></i>Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>SKU</th>
+              <th>Description</th>
+              <th>UOM</th>
+              <th>On Hand</th>
+              <th>Reserved</th>
+              <th>Available</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredItems">
+              <td><strong>{{ item.itemID }}</strong></td>
+              <td>{{ item.sku }}</td>
+              <td>{{ item.description || 'N/A' }}</td>
+              <td>{{ item.unitOfMeasure }}</td>
+              <td>{{ item.totalQuantityOnHand }}</td>
+              <td>{{ item.totalReservedQuantity }}</td>
+              <td>{{ item.totalAvailableQuantity }}</td>
+              <td>
+                <span class="badge" 
+                  [class.bg-success]="item.status === 'Active'"
+                  [class.bg-secondary]="item.status !== 'Active'">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(item)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(item)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredItems.length === 0">
+              <td colspan="9" class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No items found
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ isEditMode ? 'Edit' : 'Create' }} Item</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="itemForm">
+          <div class="mb-3">
+            <label class="form-label">SKU *</label>
+            <input type="text" class="form-control" formControlName="sku"
+              [class.is-invalid]="itemForm.get('sku')?.invalid && itemForm.get('sku')?.touched">
+            <div class="invalid-feedback">SKU is required</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" formControlName="description" rows="3"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Unit of Measure *</label>
+            <select class="form-select" formControlName="unitOfMeasure"
+              [class.is-invalid]="itemForm.get('unitOfMeasure')?.invalid && itemForm.get('unitOfMeasure')?.touched">
+              <option value="EA">Each (EA)</option>
+              <option value="CS">Case (CS)</option>
+              <option value="PL">Pallet (PL)</option>
+              <option value="BX">Box (BX)</option>
+            </select>
+            <div class="invalid-feedback">Unit of measure is required</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveItem()" [disabled]="itemForm.invalid">
+          {{ isEditMode ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal"></div>
+
+<app-confirm-dialog
+  [show]="showDeleteDialog"
+  title="Delete Item"
+  [message]="'Are you sure you want to delete item ' + selectedItem?.sku + '?'"
+  confirmText="Delete"
+  (confirmed)="deleteItem()"
+  (cancelled)="showDeleteDialog = false">
+</app-confirm-dialog>

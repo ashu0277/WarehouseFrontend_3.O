@@ -1,0 +1,26 @@
+.modal.show {
+  display: block;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+}
+
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+.modal {
+  z-index: 1050;
+}
+
+.priority-badge {
+  font-size: 1.1rem;
+  padding: 0.5rem 0.75rem;
+}

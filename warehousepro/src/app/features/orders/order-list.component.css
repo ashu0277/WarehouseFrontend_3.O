@@ -1,0 +1,37 @@
+.modal.show {
+  display: block;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+}
+
+.modal-backdrop.show {
+  opacity: 0.5;
+}
+
+.modal {
+  z-index: 1050;
+}
+
+.priority-urgent {
+  border-left: 4px solid #dc3545;
+}
+
+.priority-high {
+  border-left: 4px solid #ffc107;
+}
+
+.priority-normal {
+  border-left: 4px solid #0dcaf0;
+}
+
+.priority-low {
+  border-left: 4px solid #6c757d;
+}

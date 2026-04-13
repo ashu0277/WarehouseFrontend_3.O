@@ -1,0 +1,181 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="fw-bold">Orders</h2>
+      <p class="text-muted">Manage customer orders</p>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <i class="bi bi-plus-circle me-2"></i>Add Order
+      </button>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <input type="text" class="form-control" placeholder="Search orders..." 
+            [(ngModel)]="searchTerm" (input)="filterOrders()">
+        </div>
+        <div class="col-md-4">
+          <select class="form-select" [(ngModel)]="statusFilter" (change)="filterOrders()">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="bi bi-x-circle me-2"></i>Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Order Number</th>
+              <th>Customer</th>
+              <th>Order Date</th>
+              <th>Required Date</th>
+              <th>Status</th>
+              <th>Pick Tasks</th>
+              <th>Shipments</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of filteredOrders">
+              <td><strong>{{ order.orderID }}</strong></td>
+              <td>{{ order.orderNumber }}</td>
+              <td>{{ order.customerName }}</td>
+              <td>{{ order.orderDate | date:'short' }}</td>
+              <td>{{ order.requiredDate ? (order.requiredDate | date:'short') : 'N/A' }}</td>
+              <td>
+                <span class="badge" 
+                  [class.bg-warning]="order.status === 'Pending'"
+                  [class.bg-info]="order.status === 'Processing'"
+                  [class.bg-success]="order.status === 'Completed'"
+                  [class.bg-danger]="order.status === 'Cancelled'">
+                  {{ order.status }}
+                </span>
+              </td>
+              <td>{{ order.completedPickTasks }} / {{ order.totalPickTasks }}</td>
+              <td>{{ order.totalShipments }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(order)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(order)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredOrders.length === 0">
+              <td colspan="9" class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                No orders found
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Modal -->
+<div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ isEditMode ? 'Edit' : 'Create' }} Order</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="orderForm">
+          <div class="mb-3">
+            <label class="form-label">Order Number *</label>
+            <input type="text" class="form-control" formControlName="orderNumber"
+              [class.is-invalid]="orderForm.get('orderNumber')?.invalid && orderForm.get('orderNumber')?.touched">
+            <div class="invalid-feedback">Order number is required</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Customer Name *</label>
+            <input type="text" class="form-control" formControlName="customerName"
+              [class.is-invalid]="orderForm.get('customerName')?.invalid && orderForm.get('customerName')?.touched">
+            <div class="invalid-feedback">Customer name is required</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Delivery Address</label>
+            <textarea class="form-control" formControlName="deliveryAddress" rows="2"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Order Date *</label>
+            <input type="datetime-local" class="form-control" formControlName="orderDate"
+              [class.is-invalid]="orderForm.get('orderDate')?.invalid && orderForm.get('orderDate')?.touched">
+            <div class="invalid-feedback">Order date is required</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Required Date</label>
+            <input type="datetime-local" class="form-control" formControlName="requiredDate">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Order Lines *</label>
+            <div formArrayName="orderLines">
+              <div *ngFor="let line of orderLines.controls; let i = index" [formGroupName]="i" class="row g-2 mb-2">
+                <div class="col-7">
+                  <select class="form-select" formControlName="itemID">
+                    <option value="">Select Item</option>
+                    <option *ngFor="let item of items" [value]="item.itemID">{{ item.sku }} - {{ item.description }}</option>
+                  </select>
+                </div>
+                <div class="col-3">
+                  <input type="number" class="form-control" formControlName="quantity" placeholder="Qty" min="1">
+                </div>
+                <div class="col-2">
+                  <button type="button" class="btn btn-outline-danger w-100" (click)="removeOrderLine(i)" [disabled]="orderLines.length === 1">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary mt-2" (click)="addOrderLine()">
+              <i class="bi bi-plus-circle me-1"></i>Add Line
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveOrder()" [disabled]="orderForm.invalid">
+          {{ isEditMode ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal"></div>
+
+<app-confirm-dialog
+  [show]="showDeleteDialog"
+  title="Delete Order"
+  [message]="'Are you sure you want to delete order ' + selectedOrder?.orderNumber + '?'"
+  confirmText="Delete"
+  (confirmed)="deleteOrder()"
+  (cancelled)="showDeleteDialog = false">
+</app-confirm-dialog>

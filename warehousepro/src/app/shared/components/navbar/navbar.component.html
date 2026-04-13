@@ -1,0 +1,86 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+  <div class="container-fluid">
+    <!-- Page Title -->
+    <div class="navbar-brand">
+      <h5 class="mb-0">Warehouse Management</h5>
+    </div>
+
+    <!-- Right side items -->
+    <div class="navbar-nav ms-auto d-flex flex-row align-items-center">
+      <!-- Notifications -->
+      <div class="nav-item dropdown me-3">
+        <button class="btn btn-link nav-link position-relative" (click)="toggleNotifications()">
+          <i class="bi bi-bell fs-5"></i>
+          <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" *ngIf="unreadCount > 0">
+            {{ unreadCount }}
+          </span>
+        </button>
+
+        <!-- Notifications Dropdown -->
+        <div class="dropdown-menu dropdown-menu-end notification-dropdown" [class.show]="showNotifications">
+          <div class="dropdown-header">
+            <strong>Notifications</strong>
+          </div>
+          <div class="dropdown-divider"></div>
+          
+          <div *ngIf="notifications.length === 0" class="dropdown-item text-center text-muted">
+            No notifications
+          </div>
+
+          <a *ngFor="let notification of notifications" 
+             class="dropdown-item notification-item" 
+             [class.unread]="notification.status === 'Unread'">
+            <div class="d-flex">
+              <div class="flex-shrink-0">
+                <i class="bi" 
+                   [class.bi-info-circle]="notification.category === 'Info'"
+                   [class.bi-exclamation-triangle]="notification.category === 'Warning'"
+                   [class.bi-x-circle]="notification.category === 'Error'"
+                   [class.bi-check-circle]="notification.category === 'Success'"></i>
+              </div>
+              <div class="flex-grow-1 ms-2">
+                <strong>{{ notification.category }}</strong>
+                <p class="mb-0 small">{{ notification.message }}</p>
+                <small class="text-muted">{{ notification.createdDate | date:'short' }}</small>
+              </div>
+            </div>
+          </a>
+
+          <div class="dropdown-divider"></div>
+          <a routerLink="/notifications" class="dropdown-item text-center small">
+            View all notifications
+          </a>
+        </div>
+      </div>
+
+      <!-- User Menu -->
+      <div class="nav-item dropdown">
+        <button class="btn btn-link nav-link d-flex align-items-center" (click)="toggleUserMenu()">
+          <div class="user-avatar me-2">
+            {{ getUserInitials() }}
+          </div>
+          <span class="me-1">{{ currentUser?.name }}</span>
+          <i class="bi bi-chevron-down"></i>
+        </button>
+
+        <!-- User Dropdown - Only Role and Logout -->
+        <div class="dropdown-menu dropdown-menu-end" [class.show]="showUserMenu">
+          <div class="dropdown-header">
+            <strong>{{ currentUser?.name }}</strong>
+            <br>
+            <small class="text-muted">{{ currentUser?.email }}</small>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item-text">
+            <i class="bi bi-person-badge me-2"></i>
+            <strong>Role:</strong> {{ currentUser?.role }}
+          </div>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item text-danger" (click)="logout()">
+            <i class="bi bi-box-arrow-right me-2"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

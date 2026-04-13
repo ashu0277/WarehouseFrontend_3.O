@@ -1,0 +1,25 @@
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="fw-bold">Notifications</h2>
+      <p class="text-muted">View system notifications</p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="list-group list-group-flush">
+      <div class="list-group-item" *ngFor="let notif of notifications">
+        <div class="d-flex w-100 justify-content-between">
+          <h6 class="mb-1">{{ notif.category }}</h6>
+          <small>{{ notif.createdDate | date:'short' }}</small>
+        </div>
+        <p class="mb-1">{{ notif.message }}</p>
+        <small><span class="badge bg-info">{{ notif.status }}</span></small>
+      </div>
+      <div class="list-group-item text-center py-4" *ngIf="notifications.length === 0">
+        <i class="bi bi-bell fs-1 d-block mb-2 text-muted"></i>
+        No notifications
+      </div>
+    </div>
+  </div>
+</div>

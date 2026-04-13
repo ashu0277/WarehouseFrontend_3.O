@@ -1,0 +1,210 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <!-- Sidebar Header -->
+  <div class="sidebar-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        @if (!isCollapsed) {
+        <i class="bi bi-boxes text-primary fs-3 me-2"></i>
+        <h5 class="mb-0">WarehousePro</h5>
+        }
+      </div>
+      <button class="btn btn-link text-white p-0" (click)="toggleSidebar()">
+        <i class="bi" [class.bi-chevron-left]="!isCollapsed" [class.bi-chevron-right]="isCollapsed"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sidebar Menu -->
+  <nav class="sidebar-nav">
+    <ul class="nav flex-column">
+      
+      <!-- Dashboard - All Roles -->
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+          <i class="bi bi-speedometer2"></i>
+          @if (!isCollapsed) { <span>Dashboard</span> }
+        </a>
+      </li>
+
+      <!-- Warehouse Layout - Admin Only -->
+      @if (canAccessWarehouseLayout()) {
+      <li class="nav-section">
+        @if (!isCollapsed) { <span>WAREHOUSE LAYOUT</span> }
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/warehouses" routerLinkActive="active">
+          <i class="bi bi-building"></i>
+          @if (!isCollapsed) { <span>Warehouses</span> }
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/zones" routerLinkActive="active">
+          <i class="bi bi-grid-3x3"></i>
+          @if (!isCollapsed) { <span>Zones</span> }
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/bins" routerLinkActive="active">
+          <i class="bi bi-box-seam"></i>
+          @if (!isCollapsed) { <span>Bin Locations</span> }
+        </a>
+      </li>
+      }
+
+      <!-- Inventory Management -->
+      @if (canAccessItems() || canAccessInventory()) {
+      <li class="nav-section">
+        @if (!isCollapsed) { <span>INVENTORY</span> }
+      </li>
+      }
+      @if (canAccessItems()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/items" routerLinkActive="active">
+          <i class="bi bi-box"></i>
+          @if (!isCollapsed) { <span>Items</span> }
+        </a>
+      </li>
+      }
+      @if (canAccessInventory()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/inventory" routerLinkActive="active">
+          <i class="bi bi-clipboard-data"></i>
+          @if (!isCollapsed) { <span>Inventory Balance</span> }
+        </a>
+      </li>
+      }
+
+      <!-- Inbound Operations -->
+      @if (canAccessInbound()) {
+      <li class="nav-section">
+        @if (!isCollapsed) { <span>INBOUND</span> }
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/inbound" routerLinkActive="active">
+          <i class="bi bi-arrow-down-circle"></i>
+          @if (!isCollapsed) { <span>Receiving</span> }
+        </a>
+      </li>
+      }
+      @if (canAccessPutAway()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/putaway" routerLinkActive="active">
+          <i class="bi bi-arrow-bar-down"></i>
+          @if (!isCollapsed) { <span>Put-Away Tasks</span> }
+        </a>
+      </li>
+      }
+
+      <!-- Outbound Operations -->
+      @if (canAccessOrders()) {
+      <li class="nav-section">
+        @if (!isCollapsed) { <span>OUTBOUND</span> }
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/orders" routerLinkActive="active">
+          <i class="bi bi-cart"></i>
+          @if (!isCollapsed) { <span>Orders</span> }
+        </a>
+      </li>
+      }
+      @if (canAccessPicking()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/picking" routerLinkActive="active">
+          <i class="bi bi-hand-index"></i>
+          @if (!isCollapsed) { <span>Picking Tasks</span> }
+        </a>
+      </li>
+      }
+      @if (canAccessPacking()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/packing" routerLinkActive="active">
+          <i class="bi bi-box-seam"></i>
+          @if (!isCollapsed) { <span>Packing</span> }
+        </a>
+      </li>
+      }
+      @if (canAccessShipments()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/shipments" routerLinkActive="active">
+          <i class="bi bi-truck"></i>
+          @if (!isCollapsed) { <span>Shipments</span> }
+        </a>
+      </li>
+      }
+
+      <!-- Optimization -->
+      @if (canAccessReplenishment() || canAccessSlotting()) {
+      <li class="nav-section">
+        @if (!isCollapsed) { <span>OPTIMIZATION</span> }
+      </li>
+      }
+      @if (canAccessReplenishment()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/replenishment" routerLinkActive="active">
+          <i class="bi bi-arrow-repeat"></i>
+          @if (!isCollapsed) { <span>Replenishment</span> }
+        </a>
+      </li>
+      }
+      @if (canAccessSlotting()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/slotting" routerLinkActive="active">
+          <i class="bi bi-diagram-3"></i>
+          @if (!isCollapsed) { <span>Slotting Rules</span> }
+        </a>
+      </li>
+      }
+
+      <!-- Reports & Analytics -->
+      @if (canAccessReports()) {
+      <li class="nav-section">
+        @if (!isCollapsed) { <span>ANALYTICS</span> }
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/reports" routerLinkActive="active">
+          <i class="bi bi-file-earmark-bar-graph"></i>
+          @if (!isCollapsed) { <span>Reports</span> }
+        </a>
+      </li>
+      }
+
+      <!-- System -->
+      <li class="nav-section">
+        @if (!isCollapsed) { <span>SYSTEM</span> }
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/notifications" routerLinkActive="active">
+          <i class="bi bi-bell"></i>
+          @if (!isCollapsed) { <span>Notifications</span> }
+        </a>
+      </li>
+      @if (canAccessUsers()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/users" routerLinkActive="active">
+          <i class="bi bi-people"></i>
+          @if (!isCollapsed) { <span>Users</span> }
+        </a>
+      </li>
+      }
+      @if (canAccessAuditLog()) {
+      <li class="nav-item">
+        <a class="nav-link" routerLink="/audit-log" routerLinkActive="active">
+          <i class="bi bi-clock-history"></i>
+          @if (!isCollapsed) { <span>Audit Log</span> }
+        </a>
+      </li>
+      }
+
+    </ul>
+  </nav>
+
+  <!-- User Role Badge -->
+  @if (!isCollapsed) {
+  <div class="sidebar-footer">
+    <div class="user-role-badge">
+      <i class="bi bi-person-badge"></i>
+      <span>{{ userRole }}</span>
+    </div>
+  </div>
+  }
+</div>

@@ -1,0 +1,28 @@
+.card {
+  border: none;
+  border-radius: 15px;
+}
+
+.btn-primary {
+  padding: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.form-control {
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+a {
+  color: #667eea;
+}
+
+a:hover {
+  color: #764ba2;
+}

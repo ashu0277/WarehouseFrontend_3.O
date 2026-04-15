@@ -2,12 +2,9 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ZoneService } from '../../core/services/zone.service';
-import { Zone } from '../../core/models/zone.model';
+import { Zone } from '../../core/models/zone.model'; // Your model
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
-/**
- * ZoneList Component - Complete CRUD for zones
- */
 @Component({
   selector: 'app-zone-list',
   standalone: true,
@@ -18,6 +15,14 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 export class ZoneListComponent implements OnInit {
   private zoneService = inject(ZoneService);
   private fb = inject(FormBuilder);
+
+  // Map strings to C# Enum integers
+  private zoneTypeMap: { [key: string]: number } = {
+    'Storage': 0,
+    'Picking': 1,
+    'Shipping': 2,
+    'Receiving': 3
+  };
 
   zones: Zone[] = [];
   filteredZones: Zone[] = [];
@@ -34,8 +39,9 @@ export class ZoneListComponent implements OnInit {
   constructor() {
     this.zoneForm = this.fb.group({
       WarehouseID: [1, Validators.required],
-      Name: ['', Validators.required],
-      ZoneType: ['Storage', Validators.required]
+      Name: ['', [Validators.required, Validators.maxLength(100)]],
+      ZoneType: ['Storage', Validators.required],
+      IsDeleted: [false] 
     });
   }
 
@@ -74,17 +80,19 @@ export class ZoneListComponent implements OnInit {
 
   openCreateModal() {
     this.isEditMode = false;
-    this.zoneForm.reset({ WarehouseID: 1, ZoneType: 'Storage' });
+    this.zoneForm.reset({ WarehouseID: 1, ZoneType: 'Storage', IsDeleted: false });
     this.showModal = true;
   }
 
   openEditModal(zone: Zone) {
     this.isEditMode = true;
     this.selectedZone = zone;
+    
     this.zoneForm.patchValue({
       WarehouseID: zone.warehouseID,
       Name: zone.name,
-      ZoneType: zone.zoneType
+      ZoneType: zone.zoneType, 
+      IsDeleted: false
     });
     this.showModal = true;
   }
@@ -101,23 +109,43 @@ export class ZoneListComponent implements OnInit {
       return;
     }
 
-    const zoneData = this.zoneForm.value;
+    const formValues = this.zoneForm.value;
+
+    // Build the payload to match C# DTOs
+    const payload: any = {
+      Name: formValues.Name,
+      // CONVERSION: Must be a number for C# Enum
+      ZoneType: this.zoneTypeMap[formValues.ZoneType] ?? 0, 
+    };
 
     if (this.isEditMode && this.selectedZone) {
-      this.zoneService.update(this.selectedZone.zoneID, zoneData).subscribe({
+      // UPDATE logic: must include IsDeleted
+      payload.IsDeleted = formValues.IsDeleted ?? false;
+
+      this.zoneService.update(this.selectedZone.zoneID, payload).subscribe({
         next: () => {
           this.loadZones();
           this.closeModal();
         },
-        error: (err) => console.error('Error updating zone', err)
+        error: (err) => {
+          console.error('Update failed:', err);
+          // Check console for specific field errors
+          if (err.error?.errors) console.table(err.error.errors);
+        }
       });
     } else {
-      this.zoneService.create(zoneData).subscribe({
+      // CREATE logic: must include WarehouseID
+      payload.WarehouseID = Number(formValues.WarehouseID);
+
+      this.zoneService.create(payload).subscribe({
         next: () => {
           this.loadZones();
           this.closeModal();
         },
-        error: (err) => console.error('Error creating zone', err)
+        error: (err) => {
+          console.error('Create failed:', err);
+          if (err.error?.errors) console.table(err.error.errors);
+        }
       });
     }
   }

@@ -95,7 +95,7 @@ export class PackingListComponent implements OnInit {
     const packData = this.packForm.value;
 
     if (this.isEditMode && this.selectedPack) {
-      this.packingService.update(this.selectedPack.packingUnitID, packData).subscribe({
+      this.packingService.update(this.selectedPack.packID, packData).subscribe({
         next: () => {
           this.loadPacks();
           this.closeModal();
@@ -120,7 +120,7 @@ export class PackingListComponent implements OnInit {
 
   deletePack() {
     if (this.selectedPack) {
-      this.packingService.delete(this.selectedPack.packingUnitID).subscribe({
+      this.packingService.delete(this.selectedPack.packID).subscribe({
         next: () => {
           this.loadPacks();
           this.showDeleteDialog = false;

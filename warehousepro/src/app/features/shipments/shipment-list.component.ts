@@ -81,7 +81,7 @@ export class ShipmentListComponent implements OnInit {
       shipmentID: shipment.shipmentID,
       orderID: shipment.orderID,
       carrier: shipment.carrier,
-      trackingNumber: shipment.trackingNumber,
+      trackingNumber: shipment.orderNumber,
       dispatchDate: formattedDispatch,
       deliveryDate: formattedDelivery
     });

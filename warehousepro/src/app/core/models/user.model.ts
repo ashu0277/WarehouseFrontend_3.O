@@ -7,4 +7,6 @@ export interface User {
   phone?: string;
   isDeleted: boolean;
   createdAt: string;
+ Password?: string; // For create/update operations, not returned by API
+ ConfirmPassword?: string; // For create/update operations, not returned by API
 }

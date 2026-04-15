@@ -34,6 +34,7 @@ export class ItemListComponent implements OnInit {
     this.itemForm = this.fb.group({
       itemID: [0],
       sku: ['', Validators.required],
+        totalQuantityOnHand: [0],
       description: [''],
       unitOfMeasure: ['EA', Validators.required]
     });

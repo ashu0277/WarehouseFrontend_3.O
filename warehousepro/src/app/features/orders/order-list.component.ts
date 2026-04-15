@@ -143,12 +143,20 @@ export class OrderListComponent implements OnInit {
       return;
     }
 
-    const orderData = {
-      OrderNumber: this.orderForm.value.orderNumber,
-      CustomerName: this.orderForm.value.customerName,
-      DeliveryAddress: this.orderForm.value.deliveryAddress,
-      OrderDate: this.orderForm.value.orderDate,
-      RequiredDate: this.orderForm.value.requiredDate
+    const orderData: Order = {
+      orderID: this.isEditMode && this.selectedOrder ? this.selectedOrder.orderID : 0,
+      orderNumber: this.orderForm.value.orderNumber,
+      customerName: this.orderForm.value.customerName,
+      deliveryAddress: this.orderForm.value.deliveryAddress,
+      orderDate: this.orderForm.value.orderDate,
+      requiredDate: this.orderForm.value.requiredDate,
+      status: this.selectedOrder?.status || 'Pending',
+      createdAt: this.selectedOrder?.createdAt || new Date().toISOString(),
+      totalPickTasks: this.selectedOrder?.totalPickTasks || 0,
+      completedPickTasks: this.selectedOrder?.completedPickTasks || 0,
+      totalShipments: this.selectedOrder?.totalShipments || 0,
+      priority: this.selectedOrder?.priority || null,
+      customerId: this.selectedOrder?.customerId || null
     };
 
     if (this.isEditMode && this.selectedOrder) {

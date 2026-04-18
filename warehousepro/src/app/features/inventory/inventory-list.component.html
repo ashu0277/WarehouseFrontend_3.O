@@ -1,28 +1,49 @@
 <div class="container-fluid">
   <div class="row mb-4">
     <div class="col">
-      <h2 class="fw-bold">Inventory Balance</h2>
-      <p class="text-muted">View current inventory levels</p>
+      <h2 class="fw-bold">Inventory Management</h2>
+      <p class="text-muted">View inventory levels and manage stock reservations</p>
+    </div>
+    <div class="col-auto" *ngIf="activeTab === 'reservations'">
+      <button class="btn btn-primary" (click)="openReservationModal()">
+        <i class="bi bi-plus-circle me-2"></i>Reserve Stock
+      </button>
     </div>
   </div>
-
-  <div class="card shadow-sm mb-4">
-    <div class="card-body">
-      <div class="row g-3">
-        <div class="col-md-10">
-          <input type="text" class="form-control" placeholder="Search inventory..." 
-            [(ngModel)]="searchTerm" (input)="filterInventory()">
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
-            <i class="bi bi-x-circle me-2"></i>Reset
-          </button>
+ 
+  <!-- Tabs -->
+  <ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab === 'inventory'" (click)="switchTab('inventory')" style="cursor: pointer;">
+        <i class="bi bi-boxes me-2"></i>Inventory Balance
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" [class.active]="activeTab === 'reservations'" (click)="switchTab('reservations')" style="cursor: pointer;">
+        <i class="bi bi-lock me-2"></i>Stock Reservations
+      </a>
+    </li>
+  </ul>
+ 
+  <!-- Inventory Balance Tab -->
+  <div *ngIf="activeTab === 'inventory'">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-10">
+            <input type="text" class="form-control" placeholder="Search inventory..."
+              [(ngModel)]="searchTerm" (input)="filterInventory()">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+              <i class="bi bi-x-circle me-2"></i>Reset
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="card shadow-sm">
+ 
+    <div class="card shadow-sm">
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover mb-0">
@@ -64,4 +85,139 @@
       </div>
     </div>
   </div>
+  </div>
+ 
+  <!-- Stock Reservations Tab -->
+  <div *ngIf="activeTab === 'reservations'">
+    <div class="card shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>SKU</th>
+                <th>Bin</th>
+                <th>Reference Type</th>
+                <th>Reference ID</th>
+                <th>Quantity</th>
+                <th>Created At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let res of reservations">
+                <td><strong>{{ res.reservationID }}</strong></td>
+                <td>{{ res.sku }}</td>
+                <td>{{ getBinCode(res.binID) }}</td>
+                <td>
+                  <span class="badge bg-primary">{{ res.referenceType }}</span>
+                </td>
+                <td>{{ res.referenceID }}</td>
+                <td><strong>{{ res.quantity }}</strong></td>
+                <td>{{ res.createdAt | date:'short' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-outline-danger" (click)="confirmDeleteReservation(res)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="reservations.length === 0">
+                <td colspan="8" class="text-center text-muted py-4">
+                  <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                  No reservations found
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+ 
+<!-- Stock Reservation Modal -->
+<div class="modal" [class.show]="showReservationModal" [style.display]="showReservationModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reserve Stock</h5>
+        <button type="button" class="btn-close" (click)="closeReservationModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="reservationForm">
+          <div class="mb-3">
+            <label class="form-label">Item *</label>
+            <select class="form-select" formControlName="itemID"
+              [class.is-invalid]="reservationForm.get('itemID')?.invalid && reservationForm.get('itemID')?.touched">
+              <option value="">Select an item</option>
+              <option *ngFor="let item of items" [value]="item.itemID">
+                {{ item.sku }} - {{ item.description }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Item is required</div>
+          </div>
+ 
+          <div class="mb-3">
+            <label class="form-label">Bin Location *</label>
+            <select class="form-select" formControlName="binID"
+              [class.is-invalid]="reservationForm.get('binID')?.invalid && reservationForm.get('binID')?.touched">
+              <option value="">Select a bin</option>
+              <option *ngFor="let bin of bins" [value]="bin.binID">
+                {{ bin.code }} - {{ bin.zoneName }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Bin location is required</div>
+          </div>
+ 
+          <div class="mb-3">
+            <label class="form-label">Reference Type *</label>
+            <select class="form-select" formControlName="referenceType"
+              [class.is-invalid]="reservationForm.get('referenceType')?.invalid && reservationForm.get('referenceType')?.touched">
+              <option value="Order">Order</option>
+              <option value="Replenishment">Replenishment</option>
+            </select>
+            <div class="invalid-feedback">Reference type is required</div>
+          </div>
+ 
+          <div class="mb-3">
+            <label class="form-label">Order *</label>
+            <select class="form-select" formControlName="referenceID"
+              [class.is-invalid]="reservationForm.get('referenceID')?.invalid && reservationForm.get('referenceID')?.touched">
+              <option value="">Select an order</option>
+              <option *ngFor="let order of orders" [value]="order.orderID">
+                {{ order.orderNumber }} - {{ order.customerName }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Order is required</div>
+          </div>
+ 
+          <div class="mb-3">
+            <label class="form-label">Quantity *</label>
+            <input type="number" class="form-control" formControlName="quantity" min="1"
+              [class.is-invalid]="reservationForm.get('quantity')?.invalid && reservationForm.get('quantity')?.touched">
+            <div class="invalid-feedback">Quantity must be at least 1</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeReservationModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="saveReservation()" [disabled]="reservationForm.invalid">
+          Reserve Stock
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showReservationModal" *ngIf="showReservationModal"></div>
+ 
+<app-confirm-dialog
+  [show]="showDeleteDialog"
+  title="Delete Reservation"
+  [message]="'Are you sure you want to delete reservation #' + selectedReservation?.reservationID + '? This will release the reserved stock.'"
+  confirmText="Delete"
+  (confirmed)="deleteReservation()"
+  (cancelled)="showDeleteDialog = false">
+</app-confirm-dialog>
+ 
+ 

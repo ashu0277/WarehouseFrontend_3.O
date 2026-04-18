@@ -2,6 +2,7 @@
 export interface StockReservation {
   reservationID: number;
   itemID: number;
+  binID: number;
   sku: string;
   referenceType: string;
   referenceID: number;

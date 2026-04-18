@@ -57,13 +57,13 @@
               <td>{{ receipt.supplier }}</td>
               <td>{{ receipt.receiptDate | date:'short' }}</td>
               <td>
-                <span class="badge" 
-                  [class.bg-warning]="receipt.status === 'Pending'"
-                  [class.bg-info]="receipt.status === 'In Progress'"
-                  [class.bg-success]="receipt.status === 'Completed'">
-                  {{ receipt.status }}
-                </span>
-              </td>
+  <span class="badge" 
+    [class.text-bg-warning]="receipt.status === 'Pending'"
+    [class.text-bg-info]="receipt.status === 'In Progress'"
+    [class.text-bg-success]="receipt.status === 'Completed'">
+    {{ receipt.status }}
+  </span>
+</td>
               <td>{{ receipt.completedPutAwayTasks }} / {{ receipt.totalPutAwayTasks }}</td>
               <td>
                 <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(receipt)">

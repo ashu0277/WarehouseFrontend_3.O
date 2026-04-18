@@ -10,12 +10,12 @@
       </button>
     </div>
   </div>
-
+ 
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-6">
-          <input type="text" class="form-control" placeholder="Search tasks..." 
+          <input type="text" class="form-control" placeholder="Search tasks..."
             [(ngModel)]="searchTerm" (input)="filterTasks()">
         </div>
         <div class="col-md-4">
@@ -34,7 +34,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="card shadow-sm">
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -64,7 +64,7 @@
               <td>{{ task.pickQuantity }}</td>
               <td>{{ task.assignedToName || 'Unassigned' }}</td>
               <td>
-                <span class="badge" 
+                <span class="badge"
                   [class.bg-warning]="task.status === 'Pending'"
                   [class.bg-info]="task.status === 'In Progress'"
                   [class.bg-success]="task.status === 'Completed'">
@@ -78,7 +78,7 @@
                 <button class="btn btn-sm btn-outline-danger me-1" (click)="confirmDelete(task)">
                   <i class="bi bi-trash"></i>
                 </button>
-                <button class="btn btn-sm btn-success" (click)="completeTask(task)" 
+                <button class="btn btn-sm btn-success" (click)="completeTask(task)"
                   *ngIf="task.status !== 'Completed'">
                   <i class="bi bi-check-circle"></i>
                 </button>
@@ -96,7 +96,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Create/Edit Modal -->
 <div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
   <div class="modal-dialog">
@@ -108,36 +108,57 @@
       <div class="modal-body">
         <form [formGroup]="taskForm">
           <div class="mb-3">
-            <label class="form-label">Order ID *</label>
-            <input type="number" class="form-control" formControlName="orderID"
+            <label class="form-label">Order *</label>
+            <select class="form-select" formControlName="orderID"
               [class.is-invalid]="taskForm.get('orderID')?.invalid && taskForm.get('orderID')?.touched">
-            <div class="invalid-feedback">Order ID is required</div>
+              <option [value]="null">Select Order</option>
+              <option *ngFor="let order of orders" [value]="order.orderID">
+                {{ order.orderNumber }} - {{ order.customerName }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Order is required</div>
           </div>
-
+ 
           <div class="mb-3">
-            <label class="form-label">Item ID *</label>
-            <input type="number" class="form-control" formControlName="itemID"
+            <label class="form-label">Item (SKU) *</label>
+            <select class="form-select" formControlName="itemID"
               [class.is-invalid]="taskForm.get('itemID')?.invalid && taskForm.get('itemID')?.touched">
-            <div class="invalid-feedback">Item ID is required</div>
+              <option [value]="null">Select Item</option>
+              <option *ngFor="let item of items" [value]="item.itemID">
+                {{ item.sku }} - {{ item.description }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Item is required</div>
           </div>
-
+ 
           <div class="mb-3">
-            <label class="form-label">Bin ID *</label>
-            <input type="number" class="form-control" formControlName="binID"
+            <label class="form-label">Bin Location *</label>
+            <select class="form-select" formControlName="binID"
               [class.is-invalid]="taskForm.get('binID')?.invalid && taskForm.get('binID')?.touched">
-            <div class="invalid-feedback">Bin ID is required</div>
+              <option [value]="null">Select Bin</option>
+              <option *ngFor="let bin of bins" [value]="bin.binID">
+                {{ bin.code }} - {{ bin.zoneName }} ({{ bin.warehouseName }})
+              </option>
+            </select>
+            <div class="invalid-feedback">Bin location is required</div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Pick Quantity *</label>
             <input type="number" class="form-control" formControlName="pickQuantity" min="1"
               [class.is-invalid]="taskForm.get('pickQuantity')?.invalid && taskForm.get('pickQuantity')?.touched">
             <div class="invalid-feedback">Quantity must be at least 1</div>
           </div>
-
+ 
           <div class="mb-3">
-            <label class="form-label">Assigned To User ID</label>
-            <input type="number" class="form-control" formControlName="assignedToUserID">
+            <label class="form-label">Assigned To (Operator)</label>
+            <select class="form-select" formControlName="assignedToUserID">
+              <option [value]="null">Unassigned</option>
+              <option *ngFor="let operator of operators" [value]="operator.userID">
+                {{ operator.name }} - {{ operator.email }}
+              </option>
+            </select>
+            <small class="text-muted">Optional: Assign to a warehouse operator</small>
           </div>
         </form>
       </div>
@@ -151,7 +172,7 @@
   </div>
 </div>
 <div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal"></div>
-
+ 
 <app-confirm-dialog
   [show]="showDeleteDialog"
   title="Delete Pick Task"

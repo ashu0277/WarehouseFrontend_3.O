@@ -10,12 +10,12 @@
       </button>
     </div>
   </div>
-
+ 
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-6">
-          <input type="text" class="form-control" placeholder="Search orders..." 
+          <input type="text" class="form-control" placeholder="Search orders..."
             [(ngModel)]="searchTerm" (input)="filterOrders()">
         </div>
         <div class="col-md-4">
@@ -35,7 +35,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="card shadow-sm">
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -61,7 +61,7 @@
               <td>{{ order.orderDate | date:'short' }}</td>
               <td>{{ order.requiredDate ? (order.requiredDate | date:'short') : 'N/A' }}</td>
               <td>
-                <span class="badge" 
+                <span class="badge"
                   [class.bg-warning]="order.status === 'Pending'"
                   [class.bg-info]="order.status === 'Processing'"
                   [class.bg-success]="order.status === 'Completed'"
@@ -72,6 +72,9 @@
               <td>{{ order.completedPickTasks }} / {{ order.totalPickTasks }}</td>
               <td>{{ order.totalShipments }}</td>
               <td>
+                <button class="btn btn-sm btn-outline-success me-1" (click)="openStatusModal(order)" title="Update Status">
+                  <i class="bi bi-arrow-repeat"></i>
+                </button>
                 <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(order)">
                   <i class="bi bi-pencil"></i>
                 </button>
@@ -92,7 +95,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Create/Edit Modal -->
 <div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
   <div class="modal-dialog">
@@ -109,31 +112,31 @@
               [class.is-invalid]="orderForm.get('orderNumber')?.invalid && orderForm.get('orderNumber')?.touched">
             <div class="invalid-feedback">Order number is required</div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Customer Name *</label>
             <input type="text" class="form-control" formControlName="customerName"
               [class.is-invalid]="orderForm.get('customerName')?.invalid && orderForm.get('customerName')?.touched">
             <div class="invalid-feedback">Customer name is required</div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Delivery Address</label>
             <textarea class="form-control" formControlName="deliveryAddress" rows="2"></textarea>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Order Date *</label>
             <input type="datetime-local" class="form-control" formControlName="orderDate"
               [class.is-invalid]="orderForm.get('orderDate')?.invalid && orderForm.get('orderDate')?.touched">
             <div class="invalid-feedback">Order date is required</div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Required Date</label>
             <input type="datetime-local" class="form-control" formControlName="requiredDate">
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Order Lines *</label>
             <div formArrayName="orderLines">
@@ -170,7 +173,47 @@
   </div>
 </div>
 <div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal"></div>
-
+ 
+<!-- Status Update Modal -->
+<div class="modal" [class.show]="showStatusModal" [style.display]="showStatusModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Order Status</h5>
+        <button type="button" class="btn-close" (click)="closeStatusModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="orderForm">
+          <div class="mb-3">
+            <label class="form-label">Order Number</label>
+            <input type="text" class="form-control" [value]="selectedOrder?.orderNumber" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Customer</label>
+            <input type="text" class="form-control" [value]="selectedOrder?.customerName" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Status *</label>
+            <select class="form-select" formControlName="status">
+              <option value="0">Pending</option>
+              <option value="1">Processing</option>
+              <option value="2">Completed</option>
+              <option value="3">Cancelled</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeStatusModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="updateStatus()">
+          Update Status
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showStatusModal" *ngIf="showStatusModal"></div>
+ 
 <app-confirm-dialog
   [show]="showDeleteDialog"
   title="Delete Order"
@@ -179,3 +222,4 @@
   (confirmed)="deleteOrder()"
   (cancelled)="showDeleteDialog = false">
 </app-confirm-dialog>
+ 

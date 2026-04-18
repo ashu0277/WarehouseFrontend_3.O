@@ -10,12 +10,12 @@
       </button>
     </div>
   </div>
-
+ 
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-10">
-          <input type="text" class="form-control" placeholder="Search packing units..." 
+          <input type="text" class="form-control" placeholder="Search packing units..."
             [(ngModel)]="searchTerm" (input)="filterPacks()">
         </div>
         <div class="col-md-2">
@@ -26,7 +26,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="card shadow-sm">
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -56,6 +56,9 @@
                 <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(pack)">
                   <i class="bi bi-pencil"></i>
                 </button>
+                <button class="btn btn-sm btn-outline-success me-1" (click)="openStatusModal(pack)">
+                  <i class="bi bi-arrow-repeat"></i>
+                </button>
                 <button class="btn btn-sm btn-outline-danger" (click)="confirmDelete(pack)">
                   <i class="bi bi-trash"></i>
                 </button>
@@ -73,7 +76,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Create/Edit Modal -->
 <div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
   <div class="modal-dialog">
@@ -85,12 +88,17 @@
       <div class="modal-body">
         <form [formGroup]="packForm">
           <div class="mb-3">
-            <label class="form-label">Order ID *</label>
-            <input type="number" class="form-control" formControlName="orderID"
+            <label class="form-label">Order *</label>
+            <select class="form-select" formControlName="orderID"
               [class.is-invalid]="packForm.get('orderID')?.invalid && packForm.get('orderID')?.touched">
-            <div class="invalid-feedback">Order ID is required</div>
+              <option value="">Select an order</option>
+              <option *ngFor="let order of orders" [value]="order.orderID">
+                {{ order.orderNumber }} - {{ order.customerName }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Order is required</div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Package Type *</label>
             <select class="form-select" formControlName="packageType"
@@ -102,12 +110,12 @@
             </select>
             <div class="invalid-feedback">Package type is required</div>
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Weight (kg)</label>
             <input type="number" class="form-control" formControlName="weight" min="0" step="0.1">
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Dimensions</label>
             <input type="text" class="form-control" formControlName="dimensions" placeholder="L x W x H">
@@ -124,7 +132,35 @@
   </div>
 </div>
 <div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal"></div>
-
+ 
+<!-- Status Update Modal -->
+<div class="modal" [class.show]="showStatusModal" [style.display]="showStatusModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Packing Status</h5>
+        <button type="button" class="btn-close" (click)="closeStatusModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="packForm">
+          <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" formControlName="status">
+              <option value="0">Packed</option>
+              <option value="1">Shipped</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeStatusModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="updateStatus()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showStatusModal" *ngIf="showStatusModal"></div>
+ 
 <app-confirm-dialog
   [show]="showDeleteDialog"
   title="Delete Packing Unit"
@@ -133,3 +169,5 @@
   (confirmed)="deletePack()"
   (cancelled)="showDeleteDialog = false">
 </app-confirm-dialog>
+ 
+ 

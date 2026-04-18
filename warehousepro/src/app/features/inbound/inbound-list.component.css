@@ -19,3 +19,7 @@
 .modal {
   z-index: 1050;
 }
+.badge {
+  /* font-size: 0.875rem; */
+  background-color: blue;
+}

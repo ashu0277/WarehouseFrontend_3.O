@@ -10,14 +10,14 @@
       </button>
     </div>
   </div>
-
+ 
   <div class="card shadow-sm mb-4">
     <div class="card-body">
-      <input type="text" class="form-control" placeholder="Search shipments..." 
+      <input type="text" class="form-control" placeholder="Search shipments..."
         [(ngModel)]="searchTerm" (input)="filterShipments()">
     </div>
   </div>
-
+ 
   <div class="card shadow-sm">
     <div class="card-body p-0">
       <div class="table-responsive">
@@ -43,7 +43,12 @@
               <td>{{ shipment.dispatchDate ? (shipment.dispatchDate | date:'short') : 'N/A' }}</td>
               <td>{{ shipment.deliveryDate ? (shipment.deliveryDate | date:'short') : 'N/A' }}</td>
               <td>
-                <span class="badge bg-success">{{ shipment.status }}</span>
+                <span class="badge"
+                  [class.bg-warning]="shipment.status === 'Dispatched'"
+                  [class.bg-info]="shipment.status === 'InTransit'"
+                  [class.bg-success]="shipment.status === 'Delivered'">
+                  {{ shipment.status }}
+                </span>
               </td>
               <td>
                 <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditModal(shipment)">
@@ -66,7 +71,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Create/Edit Modal -->
 <div class="modal" [class.show]="showModal" [style.display]="showModal ? 'block' : 'none'" tabindex="-1">
   <div class="modal-dialog">
@@ -78,32 +83,48 @@
       <div class="modal-body">
         <form [formGroup]="shipmentForm">
           <div class="mb-3">
-            <label class="form-label">Order ID *</label>
-            <input type="number" class="form-control" formControlName="orderID"
+            <label class="form-label">Order *</label>
+            <select class="form-select" formControlName="orderID" (change)="onOrderChange()"
               [class.is-invalid]="shipmentForm.get('orderID')?.invalid && shipmentForm.get('orderID')?.touched">
-            <div class="invalid-feedback">Order ID is required</div>
+              <option [ngValue]="null">Select Order</option>
+              <option *ngFor="let order of orders" [ngValue]="order.orderID">
+                {{ order.orderNumber }} - {{ order.customerName }}
+              </option>
+            </select>
+            <div class="invalid-feedback">Order is required</div>
           </div>
-
+ 
+          <div class="mb-3">
+            <label class="form-label">Customer</label>
+            <input type="text" class="form-control" formControlName="customer" readonly>
+          </div>
+ 
           <div class="mb-3">
             <label class="form-label">Carrier *</label>
             <input type="text" class="form-control" formControlName="carrier"
               [class.is-invalid]="shipmentForm.get('carrier')?.invalid && shipmentForm.get('carrier')?.touched">
             <div class="invalid-feedback">Carrier is required</div>
           </div>
-
-          <div class="mb-3">
-            <label class="form-label">Tracking Number</label>
-            <input type="text" class="form-control" formControlName="trackingNumber">
-          </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Dispatch Date</label>
             <input type="datetime-local" class="form-control" formControlName="dispatchDate">
           </div>
-
+ 
           <div class="mb-3">
             <label class="form-label">Delivery Date</label>
             <input type="datetime-local" class="form-control" formControlName="deliveryDate">
+          </div>
+ 
+          <div class="mb-3" *ngIf="isEditMode">
+            <label class="form-label">Status *</label>
+            <select class="form-select" formControlName="status"
+              [class.is-invalid]="shipmentForm.get('status')?.invalid && shipmentForm.get('status')?.touched">
+              <option value="0">Dispatched</option>
+              <option value="1">In Transit</option>
+              <option value="2">Delivered</option>
+            </select>
+            <div class="invalid-feedback">Status is required</div>
           </div>
         </form>
       </div>
@@ -117,7 +138,7 @@
   </div>
 </div>
 <div class="modal-backdrop fade" [class.show]="showModal" *ngIf="showModal"></div>
-
+ 
 <app-confirm-dialog
   [show]="showDeleteDialog"
   title="Delete Shipment"
@@ -126,3 +147,5 @@
   (confirmed)="deleteShipment()"
   (cancelled)="showDeleteDialog = false">
 </app-confirm-dialog>
+ 
+ 

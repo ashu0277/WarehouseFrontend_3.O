@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } 
 import { SlottingRuleService } from '../../core/services/slotting-rule.service';
 import { SlottingRule } from '../../core/models/slotting-rule.model';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-
+ 
 @Component({
   selector: 'app-slotting-list',
   standalone: true,
@@ -15,31 +15,32 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 export class SlottingListComponent implements OnInit {
   private slottingService = inject(SlottingRuleService);
   private fb = inject(FormBuilder);
-
+ 
   rules: SlottingRule[] = [];
   filteredRules: SlottingRule[] = [];
   ruleForm: FormGroup;
-  
+ 
   showModal = false;
   showDeleteDialog = false;
   isEditMode = false;
   selectedRule: SlottingRule | null = null;
-  
+ 
   searchTerm = '';
-
+ 
   constructor() {
     this.ruleForm = this.fb.group({
       ruleID: [0],
       criterion: ['', Validators.required],
       description: [''],
-      priority: [1, [Validators.required, Validators.min(1)]]
+      priority: [1, [Validators.required, Validators.min(1)]],
+      status: [0]
     });
   }
-
+ 
   ngOnInit() {
     this.loadRules();
   }
-
+ 
   loadRules() {
     this.slottingService.getAll().subscribe({
       next: (data) => {
@@ -49,49 +50,56 @@ export class SlottingListComponent implements OnInit {
       error: (err) => console.error('Error loading slotting rules', err)
     });
   }
-
+ 
   filterRules() {
     this.filteredRules = this.rules.filter(r => {
-      return !this.searchTerm || 
+      return !this.searchTerm ||
         r.criterion.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         (r.description && r.description.toLowerCase().includes(this.searchTerm.toLowerCase()));
     });
   }
-
+ 
   resetFilters() {
     this.searchTerm = '';
     this.filteredRules = this.rules;
   }
-
+ 
   openCreateModal() {
     this.isEditMode = false;
     this.ruleForm.reset({ ruleID: 0, priority: 1 });
     this.showModal = true;
   }
-
+ 
   openEditModal(rule: SlottingRule) {
     this.isEditMode = true;
     this.selectedRule = rule;
     this.ruleForm.patchValue(rule);
     this.showModal = true;
   }
-
+ 
   closeModal() {
     this.showModal = false;
     this.ruleForm.reset();
     this.selectedRule = null;
   }
-
+ 
   saveRule() {
     if (this.ruleForm.invalid) {
       this.ruleForm.markAllAsTouched();
       return;
     }
-
-    const ruleData = this.ruleForm.value;
-
+ 
+    const formValue = this.ruleForm.value;
+ 
     if (this.isEditMode && this.selectedRule) {
-      this.slottingService.update(this.selectedRule.ruleID, ruleData).subscribe({
+      const updateData = {
+        Criterion: parseInt(formValue.criterion),
+        Priority: formValue.priority,
+        Description: formValue.description,
+        Status: formValue.status || 0
+      } as any;
+ 
+      this.slottingService.update(this.selectedRule.ruleID, updateData).subscribe({
         next: () => {
           this.loadRules();
           this.closeModal();
@@ -99,7 +107,13 @@ export class SlottingListComponent implements OnInit {
         error: (err) => console.error('Error updating rule', err)
       });
     } else {
-      this.slottingService.create(ruleData).subscribe({
+      const createData = {
+        Criterion: parseInt(formValue.criterion),
+        Priority: formValue.priority,
+        Description: formValue.description
+      } as any;
+ 
+      this.slottingService.create(createData).subscribe({
         next: () => {
           this.loadRules();
           this.closeModal();
@@ -108,12 +122,12 @@ export class SlottingListComponent implements OnInit {
       });
     }
   }
-
+ 
   confirmDelete(rule: SlottingRule) {
     this.selectedRule = rule;
     this.showDeleteDialog = true;
   }
-
+ 
   deleteRule() {
     if (this.selectedRule) {
       this.slottingService.delete(this.selectedRule.ruleID).subscribe({

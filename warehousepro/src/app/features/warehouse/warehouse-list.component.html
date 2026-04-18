@@ -58,7 +58,7 @@
               <td>{{ warehouse.name }}</td>
               <td>{{ warehouse.location }}</td>
               <td>
-                <span class="badge" [class.bg-success]="warehouse.status === 'Active'" [class.bg-secondary]="warehouse.status !== 'Active'">
+                <span class="badge" [class.bg-success]="warehouse.status === 'Active'" [class.bg-danger]="warehouse.status !== 'Active'">
                   {{ warehouse.status }}
                 </span>
               </td>
